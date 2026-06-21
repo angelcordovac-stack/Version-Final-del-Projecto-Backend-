@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 @NoArgsConstructor
@@ -40,4 +41,10 @@ public class DiccionarioFallas {
     // en el backend y nunca se expone como campo editable en el formulario.
     @Column(name = "fecha_registro")
     private LocalDateTime fechaRegistro;
+
+    // Campo no persistido: se completa en el service a partir del id_autor
+    // para mostrar el nombre del tecnico/usuario asignado en el detalle.
+    @Transient
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private String nombreAutor;
 }

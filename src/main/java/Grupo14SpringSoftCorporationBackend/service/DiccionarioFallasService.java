@@ -1,7 +1,9 @@
 package Grupo14SpringSoftCorporationBackend.service;
 
 import Grupo14SpringSoftCorporationBackend.model.DiccionarioFallas;
+import Grupo14SpringSoftCorporationBackend.model.Usuario;
 import Grupo14SpringSoftCorporationBackend.repository.DiccionarioFallasRepository;
+import Grupo14SpringSoftCorporationBackend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,9 @@ public class DiccionarioFallasService {
 
     @Autowired
     private DiccionarioFallasRepository repo;
+
+    @Autowired
+    private UsuarioRepository usuarioRepo;
 
     // Estados permitidos para la solucion registrada en el diccionario de fallas
     private static final Set<String> ESTADOS_VALIDOS = Set.of(
@@ -39,15 +44,33 @@ public class DiccionarioFallasService {
         // automatica en el servidor; nunca se toma del cliente.
         falla.setFechaRegistro(LocalDateTime.now());
 
-        return repo.save(falla);
+        DiccionarioFallas guardada = repo.save(falla);
+        return conNombreAutor(guardada);
     }
 
     public List<DiccionarioFallas> listar() {
-        return repo.findAll();
+        return conNombreAutor(repo.findAll());
     }
 
     public List<DiccionarioFallas> buscar(String keyword) {
-        return repo.findByProblemaComunContainingIgnoreCaseOrSolucionSugeridaContainingIgnoreCase(
+        List<DiccionarioFallas> resultado = repo.findByProblemaComunContainingIgnoreCaseOrSolucionSugeridaContainingIgnoreCase(
                 keyword, keyword);
+        return conNombreAutor(resultado);
+    }
+
+    // Completa el nombre del tecnico/usuario asignado a partir de id_autor,
+    // para que el frontend pueda mostrarlo en el detalle de la falla.
+    private List<DiccionarioFallas> conNombreAutor(List<DiccionarioFallas> fallas) {
+        fallas.forEach(this::conNombreAutor);
+        return fallas;
+    }
+
+    private DiccionarioFallas conNombreAutor(DiccionarioFallas falla) {
+        if (falla.getIdAutor() != null) {
+            usuarioRepo.findById(falla.getIdAutor())
+                    .map(Usuario::getNombreCompleto)
+                    .ifPresent(falla::setNombreAutor);
+        }
+        return falla;
     }
 }
