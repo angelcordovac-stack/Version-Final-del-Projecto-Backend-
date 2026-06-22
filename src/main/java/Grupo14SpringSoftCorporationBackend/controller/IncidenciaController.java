@@ -2,6 +2,7 @@ package Grupo14SpringSoftCorporationBackend.controller;
 
 import Grupo14SpringSoftCorporationBackend.model.Incidencia;
 import Grupo14SpringSoftCorporationBackend.service.IncidenciaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class IncidenciaController {
 
     // REGISTRAR INCIDENCIA - cualquier usuario autenticado del area
     @PostMapping
-    public Incidencia registrar(@RequestBody Incidencia incidencia) {
+    public Incidencia registrar(@Valid @RequestBody Incidencia incidencia) {
         return service.registrar(incidencia);
     }
 

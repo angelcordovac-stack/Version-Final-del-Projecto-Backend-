@@ -36,6 +36,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/usuarios/login",
+                                "/usuarios/refresh",  // renovar access token con refresh token
+                                "/usuarios/logout",   // revocar refresh token
                                 "/dev/**",                  // helper de hash BCrypt (DEV)
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",

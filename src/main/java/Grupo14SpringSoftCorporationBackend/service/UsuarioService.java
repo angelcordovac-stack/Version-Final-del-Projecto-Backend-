@@ -1,5 +1,6 @@
 package Grupo14SpringSoftCorporationBackend.service;
 
+import Grupo14SpringSoftCorporationBackend.model.RefreshToken;
 import Grupo14SpringSoftCorporationBackend.model.Usuario;
 import Grupo14SpringSoftCorporationBackend.repository.UsuarioRepository;
 import Grupo14SpringSoftCorporationBackend.util.JwtUtil;
@@ -25,8 +26,11 @@ public class UsuarioService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private RefreshTokenService refreshTokenService;
+
     /**
-     * LOGIN - devuelve token + datos del usuario.
+     * LOGIN - devuelve access token + refresh token + datos del usuario.
      * Verifica la password con BCrypt (no en texto plano).
      */
     public Map<String, Object> login(String correo, String password) {
@@ -43,10 +47,14 @@ public class UsuarioService {
             return null;
         }
 
-        String token = jwtUtil.generateToken(u.getCorreo(), u.getIdUsuario(), u.getIdPerfil());
+        String accessToken = jwtUtil.generateToken(u.getCorreo(), u.getIdUsuario(), u.getIdPerfil());
+
+        // Crear (o rotar) el refresh token para este usuario
+        RefreshToken refreshToken = refreshTokenService.crear(u.getIdUsuario());
 
         Map<String, Object> response = new HashMap<>();
-        response.put("token", token);
+        response.put("token", accessToken);
+        response.put("refreshToken", refreshToken.getToken());
         response.put("idUsuario", u.getIdUsuario());
         response.put("nombreCompleto", u.getNombreCompleto());
         response.put("correo", u.getCorreo());
