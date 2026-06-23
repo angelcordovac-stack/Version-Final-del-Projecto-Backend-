@@ -1,0 +1,29 @@
+# Build artifacts
+target/
+build/
+
+# Secretos y entorno local — NUNCA deben entrar a la imagen
+.env
+.env.local
+.env.*.local
+
+# IDE / editores
+.idea/
+.vscode/
+*.iml
+.settings/
+.classpath
+.project
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docs / ayuda
+HELP.md
+README.md
+
+# OS
+.DS_Store
+Thumbs.db
