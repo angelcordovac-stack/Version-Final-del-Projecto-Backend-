@@ -2,6 +2,7 @@ package Grupo14SpringSoftCorporationBackend.service;
 
 import Grupo14SpringSoftCorporationBackend.model.RefreshToken;
 import Grupo14SpringSoftCorporationBackend.model.Usuario;
+import Grupo14SpringSoftCorporationBackend.repository.TecnicoRepository;
 import Grupo14SpringSoftCorporationBackend.repository.UsuarioRepository;
 import Grupo14SpringSoftCorporationBackend.util.JwtUtil;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,9 @@ class UsuarioServiceTest {
 
     @Mock
     private UsuarioRepository repo;
+
+    @Mock
+    private TecnicoRepository tecnicoRepo;
 
     @Mock
     private JwtUtil jwtUtil;
@@ -223,6 +227,7 @@ class UsuarioServiceTest {
         aActualizar.setIdUsuario(1);
         aActualizar.setCorreo("mismo@correo.com");
         aActualizar.setPasswordHash(null); // no cambia password
+        aActualizar.setIdPerfil(1);
 
         Usuario existenteEnBd = usuarioActivo();
         existenteEnBd.setIdUsuario(1);
@@ -243,6 +248,7 @@ class UsuarioServiceTest {
         Usuario nuevo = new Usuario();
         nuevo.setCorreo("nuevo@correo.com");
         nuevo.setPasswordHash("miPasswordPlano");
+        nuevo.setIdPerfil(1);
 
         when(repo.findByCorreo("nuevo@correo.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("miPasswordPlano")).thenReturn("$2a$10$hasheada");
@@ -259,6 +265,7 @@ class UsuarioServiceTest {
         Usuario nuevo = new Usuario();
         nuevo.setCorreo("nuevo@correo.com");
         nuevo.setPasswordHash("$2b$10$yaEstaHasheada");
+        nuevo.setIdPerfil(1);
 
         when(repo.findByCorreo("nuevo@correo.com")).thenReturn(Optional.empty());
         when(repo.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -290,6 +297,7 @@ class UsuarioServiceTest {
         aActualizar.setIdUsuario(1);
         aActualizar.setCorreo("usuario@correo.com");
         aActualizar.setPasswordHash("");
+        aActualizar.setIdPerfil(1);
 
         Usuario existenteEnBd = usuarioActivo();
         existenteEnBd.setPasswordHash("$2a$10$hashOriginalGuardado");
