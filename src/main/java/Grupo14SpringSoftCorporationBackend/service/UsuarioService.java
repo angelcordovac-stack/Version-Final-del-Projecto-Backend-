@@ -1,13 +1,16 @@
 package Grupo14SpringSoftCorporationBackend.service;
 
 import Grupo14SpringSoftCorporationBackend.model.RefreshToken;
+import Grupo14SpringSoftCorporationBackend.model.Tecnico;
 import Grupo14SpringSoftCorporationBackend.model.Usuario;
+import Grupo14SpringSoftCorporationBackend.repository.TecnicoRepository;
 import Grupo14SpringSoftCorporationBackend.repository.UsuarioRepository;
 import Grupo14SpringSoftCorporationBackend.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
@@ -17,8 +20,13 @@ import java.util.Map;
 @Service
 public class UsuarioService {
 
+    private static final int PERFIL_TECNICO = 2;
+
     @Autowired
     private UsuarioRepository repo;
+
+    @Autowired
+    private TecnicoRepository tecnicoRepo;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -94,7 +102,14 @@ public class UsuarioService {
      * Si la password viene en texto plano (no esta hasheada), la hashea con BCrypt.
      * Para detectar si esta hasheada, se chequea el prefijo $2 que usan los hashes
      * BCrypt ($2a$, $2b$, $2y$).
+     *
+     * SINCRONIZACION CON TABLA TECNICOS:
+     * - Si el usuario tiene idPerfil == 2 (Técnico), se crea automáticamente
+     *   un registro en la tabla "tecnicos" si no existe aún.
+     * - Si se cambia el perfil a otro distinto de 2, se elimina el registro
+     *   de "tecnicos" (si existía).
      */
+    @Transactional
     public Usuario guardar(Usuario usuario) {
         // Validacion: correo unico
         if (usuario.getIdUsuario() == null) {
@@ -130,15 +145,53 @@ public class UsuarioService {
             }
         }
 
-        return repo.save(usuario);
+        // Guardar el usuario primero para tener el id generado (en caso de creacion)
+        Usuario guardado = repo.save(usuario);
+
+        // --- SINCRONIZACION CON TABLA TECNICOS ---
+        sincronizarTecnico(guardado);
+
+        return guardado;
+    }
+
+    /**
+     * Si el usuario es Técnico (idPerfil == 2), garantiza que exista un registro
+     * en la tabla "tecnicos". Si ya existía, lo deja intacto (no pisa especialidad
+     * ni maxIncidencias que hayan sido configurados manualmente).
+     *
+     * Si el usuario dejó de ser Técnico, elimina su registro de "tecnicos".
+     */
+    private void sincronizarTecnico(Usuario usuario) {
+        Integer idUsuario = usuario.getIdUsuario();
+
+        if (PERFIL_TECNICO == usuario.getIdPerfil()) {
+            // Crear registro en tecnicos si no existe todavia
+            boolean yaTecnico = tecnicoRepo.existsById(idUsuario);
+            if (!yaTecnico) {
+                Tecnico nuevoTecnico = new Tecnico();
+                nuevoTecnico.setIdUsuario(idUsuario);
+                nuevoTecnico.setEspecialidad("General");
+                nuevoTecnico.setMaxIncidencias(5);
+                nuevoTecnico.setDisponibilidad(true);
+                tecnicoRepo.save(nuevoTecnico);
+            }
+        } else {
+            // Si el usuario ya no es Técnico, quitar su registro de tecnicos (si existia)
+            if (tecnicoRepo.existsById(idUsuario)) {
+                tecnicoRepo.deleteById(idUsuario);
+            }
+        }
     }
 
     // ELIMINAR
+    @Transactional
     public void eliminar(Integer id) {
         if (!repo.existsById(id)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "No existe el usuario con id: " + id);
         }
+        // Si era técnico, eliminar su registro de tecnicos primero
+        tecnicoRepo.deleteById(id);
         repo.deleteById(id);
     }
 }
