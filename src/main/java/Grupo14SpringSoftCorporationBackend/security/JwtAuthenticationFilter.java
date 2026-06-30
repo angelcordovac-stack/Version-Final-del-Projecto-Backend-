@@ -55,9 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                // Mapear idPerfil a ROLE_* usando el dato actualizado de la BD,
-                // no el que viene del token (evita escalada de privilegios si el
-                // token fuera fabricado o si el rol cambio).
+                
                 String rol = switch (usuario.getIdPerfil()) {
                     case 1 -> "ROLE_JEFE";
                     case 2 -> "ROLE_TECNICO";

@@ -23,10 +23,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Pruebas funcionales (sin seguridad) del controlador.
- * La autorizacion por rol se prueba en IncidenciaControllerSecurityTest.
- */
+
 @WebMvcTest(IncidenciaController.class)
 @AutoConfigureMockMvc(addFilters = false)
 class IncidenciaControllerTest {
@@ -34,9 +31,6 @@ class IncidenciaControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    // JwtAuthenticationFilter es recogido automaticamente por @WebMvcTest
-    // (es un Filter), por lo que sus dependencias deben mockearse aunque
-    // este controlador no tenga relacion directa con la seguridad.
     @MockitoBean
     private JwtUtil jwtUtil;
 

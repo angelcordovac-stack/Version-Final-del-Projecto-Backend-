@@ -5,11 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Prueba la configuracion @JsonProperty(WRITE_ONLY) y @JsonAlias de Usuario:
- * la password nunca debe salir en las respuestas JSON, pero si debe poder
- * recibirse tanto con la clave "password" como con "passwordHash".
- */
 class UsuarioJsonSerializationTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();

@@ -6,7 +6,6 @@ import Grupo14SpringSoftCorporationBackend.repository.UsuarioRepository;
 import Grupo14SpringSoftCorporationBackend.service.RefreshTokenService;
 import Grupo14SpringSoftCorporationBackend.service.UsuarioService;
 import Grupo14SpringSoftCorporationBackend.util.JwtUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -25,20 +24,13 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Estos endpoints estan marcados como permitAll en SecurityConfig
- * (/usuarios/login, /usuarios/refresh, /usuarios/logout), por eso no hace
- * falta un test de autorizacion separado: se desactivan los filtros para
- * centrarse en el comportamiento funcional.
- */
+
 @WebMvcTest(UsuarioController.class)
 @AutoConfigureMockMvc(addFilters = false)
 class UsuarioControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockitoBean
     private UsuarioService service;
@@ -56,9 +48,7 @@ class UsuarioControllerTest {
 
     @Test
     void login_devuelve200ConElTokenCuandoLasCredencialesSonCorrectas() throws Exception {
-        // No se serializa un objeto Usuario aqui a proposito: passwordHash es
-        // @JsonProperty(WRITE_ONLY), por lo que serializarlo eliminaria la
-        // contrasena tambien del cuerpo de la peticion. Se envia JSON crudo.
+
         Map<String, Object> respuestaServicio = Map.of(
                 "token", "access-token",
                 "refreshToken", "refresh-token",
@@ -85,7 +75,6 @@ class UsuarioControllerTest {
                 .andExpect(jsonPath("$.error").value("Credenciales invalidas"));
     }
 
-    // ---------- refresh ----------
 
     @Test
     void refresh_devuelve400CuandoNoSeEnviaElRefreshToken() throws Exception {
@@ -177,7 +166,7 @@ class UsuarioControllerTest {
                 .andExpect(jsonPath("$.refreshToken").value("nuevo-refresh-token"));
     }
 
-    // ---------- logout ----------
+
 
     @Test
     void logout_revocaElRefreshTokenCuandoEsValido() throws Exception {

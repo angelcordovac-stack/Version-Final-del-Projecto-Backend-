@@ -12,11 +12,6 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Prueba las anotaciones de validacion (@NotBlank, @Size, @Email) declaradas
- * en la entidad Usuario. Esto es 'logica real' configurada en el modelo,
- * a diferencia de los getters/setters generados por Lombok.
- */
 class UsuarioValidationTest {
 
     private static ValidatorFactory factory;
